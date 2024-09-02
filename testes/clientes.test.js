@@ -1,6 +1,6 @@
 const request = require('supertest');
 const app = require('../index');
-const _id = res.body.id;
+/* const _id = res.body.id; */
 
 
 describe('GET, GET ONE /clientes', () => {
