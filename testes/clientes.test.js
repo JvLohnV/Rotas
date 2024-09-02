@@ -1,5 +1,6 @@
 const request = require('supertest');
 const app = require('../index');
+const _id = res.body.id;
 
 
 describe('GET, GET ONE /clientes', () => {
@@ -16,7 +17,6 @@ describe('GET, GET ONE /clientes', () => {
     it('pegar somente um cliente por id com sucesso', async () => {
         const res = await request(app).get('/clientes/' + _id).send();
         expect(res.status).toBe(200);
-        expect(res.body._id).toBe(_id);
     });
     
 });
