@@ -1,4 +1,4 @@
-/* const request = require('supertest');
+const request = require('supertest');
 const app = require('../index');
 
 let _id;  // Variável para armazenar o ID do produto criado
@@ -99,4 +99,4 @@ describe('DELETE /produtos/:id', () => {
         const res = await request(app).delete('/produtos/invalid_id').send();
         expect(res.status).toBe(404);
     });
-}); */
+}); 
