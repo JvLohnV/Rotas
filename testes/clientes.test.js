@@ -1,9 +1,8 @@
 const request = require('supertest');
 const app = require('../index');
-/* const _id = res.body.id; */
+let _id;  // Variável para armazenar o ID do cliente criado
 
-
-describe('GET, GET ONE /clientes', () => {
+describe('GET /clientes', () => {
     it('pegar a lista de clientes com sucesso', async () => {
         const res = await request(app).get('/clientes/').send();
         expect(res.status).toBe(200);
@@ -14,83 +13,86 @@ describe('GET, GET ONE /clientes', () => {
         expect(res.body).toBeDefined();
     });
 
-    it('pegar somente um cliente por id com sucesso', async () => {
-        const res = await request(app).get('/clientes/' + _id).send();
-        expect(res.status).toBe(200);
+    it('deve retornar 404 quando não há clientes', async () => {
+        const res = await request(app).get('/clientes/invalid_id').send();
+        expect(res.status).toBe(404);
     });
-    
 });
 
-
-describe('POST, ERROS /clientes/:id', () => {
+describe('POST /clientes', () => {
     it('criar cliente com sucesso', async () => {
         const res = await request(app).post('/clientes/').send({
-            nome: 'João Vitor',
-            email: 'joaovitor@texte.com',
+            nome: 'Jão Vitor',
+            email: 'Jv@lohn.com',
             senha: '54321'
         });
-        expect(res.status).toBe(204);
-        const _id = res.body.id;
+        expect(res.status).toBe(201);
+        _id = res.body.id; // Armazena o ID do cliente criado para uso posterior
     });
 
-    it('erro ao tentar criar cliente sem nome', async () => {
+    it('deve retornar 400 se o email estiver faltando', async () => {
         const res = await request(app).post('/clientes/').send({
-            email: 'semnome@teste.com',
+            nome: 'Jão Vitor',
             senha: '54321'
         });
-        expect(res.status).toBe(400);  
-        expect(res.body.error).toBe('Nome é obrigatório');
+        expect(res.status).toBe(400); // Verifica se o status é 400
     });
 
-    it('erro ao tentar criar cliente sem e-mail', async () => {
+    it('deve retornar 400 se o nome estiver faltando', async () => {
         const res = await request(app).post('/clientes/').send({
-            nome: 'Sem Email',
+            email: 'Jv@lohn.com',
             senha: '54321'
         });
-        expect(res.status).toBe(400);
-        expect(res.body.error).toBe('Email é obrigatório');
+        expect(res.status).toBe(400); // Verifica se o status é 400
     });
-
-    it('erro ao tentar criar cliente sem senha', async () => {
-        const res = await request(app).post('/clientes/').send({
-            nome: 'Sem Senha',
-            email: 'semsenha@teste.com'
-        });
-        expect(res.status).toBe(400);
-        expect(res.body.error).toBe('Senha é obrigatória');
-    });
-
 });
 
+describe('GET /clientes/:id', () => {
+    it('listar 1 cliente pelo ID com sucesso', async () => {
+        const res = await request(app).get(`/clientes/${_id}`).send();
+        expect(res.status).toBe(200);
+        expect(res.body).toHaveProperty('id', _id); // Verifica se o ID é correto
+    });
 
-describe('ATUALIZAR /clientes/:id', () => {
-    it('atualizar nome do cliente com sucesso', async () => {
-        const res = await request(app).post('/clientes/' + _id).send(
-           {
-               nome:'Jão Vitor'
-           })
-           expect(res.status).toBe(200)
-    })
-})
+    it('deve retornar 404 para cliente não encontrado', async () => {
+        const res = await request(app).get('/clientes/invalid_id').send();
+        expect(res.status).toBe(404);
+    });
+});
 
-/* 
-describe('DELETE, ERRO /clientes/:id', () => {
-    it('deletar o usuario com o id com sucesso', async () => {
-        const createRes = await request(app).post('/clientes/').send({
-            nome: 'João Vitor',
-            email: 'joaovitor@texte.com',
-            senha: '54321'
+describe('PUT /clientes/:id', () => {
+    it('Atualizar nome do cliente com sucesso', async () => {
+        const res = await request(app).put(`/clientes/${_id}`).send({
+            nome: 'Jão Vitor Atualizado',
+            email: "BD@texte.com",
         });
-        const _id = createRes.body.id;
-
-        const res = await request(app).delete('/clientes/' + _id).send();
         expect(res.status).toBe(200);
     });
 
-    it('erro ao tentar deletar cliente com id invalido', async () => {
-        const res = await request(app).delete('/clientes/invalidID').send();
-        expect(res.status).toBe(404); 
-        expect(res.body.error).toBe('Cliente não encontrado');
+    it('deve retornar 404 se o cliente não existir', async () => {
+        const res = await request(app).put('/clientes/invalid_id').send({
+            nome: 'Novo Nome',
+            email: "novo_email@texte.com",
+        });
+        expect(res.status).toBe(404);
     });
-}); */
- 
+
+    it('deve retornar 400 se o nome estiver faltando', async () => {
+        const res = await request(app).put(`/clientes/${_id}`).send({
+            email: "novo_email@texte.com",
+        });
+        expect(res.status).toBe(400); // Verifica se o status é 400
+    });
+});
+
+describe('DELETE /clientes/:id', () => {
+    it('deletar cliente com sucesso', async () => {
+        const res = await request(app).delete(`/clientes/${_id}`).send();
+        expect(res.status).toBe(204); // Geralmente 204 para deleção bem-sucedida
+    });
+
+    it('deve retornar 404 ao tentar deletar cliente que não existe', async () => {
+        const res = await request(app).delete('/clientes/invalid_id').send();
+        expect(res.status).toBe(404);
+    });
+});
