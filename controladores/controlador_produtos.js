@@ -3,6 +3,7 @@ const { v4: uuidv4 } = require('uuid')
 const fs = require('fs')
 
 const listProdutos = async (req, res) => {
+    console.log(req.cookies)
     var produtos = db.produtos
     res.json(produtos)
 }
@@ -24,7 +25,6 @@ const createProduto = async (req, res) => {
     }
     const _id = uuidv4()
     dados.id = _id
-
     lista_produtos = db.produtos
     lista_produtos.push(dados)
     console.log(lista_produtos)
